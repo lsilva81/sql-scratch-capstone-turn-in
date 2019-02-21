@@ -1,0 +1,73 @@
+select distinct q.user_id, 
+case when hto.user_id is not null then 'TRUE' else 'FALSE' end as is_home_try_on,number_of_pairs,case when p.user_id is not null then 'TRUE' else 'FALSE' end as is_purchase
+
+from quiz as 'q'
+left join home_try_on as 'hto'
+on q.user_id=hto.user_id
+left join purchase as 'p'
+on hto.user_id=p.user_id
+limit 10;
+
+
+with Progress as(
+select distinct q.user_id , 
+case when hto.user_id is not null then 'TRUE' else 'FALSE' end as is_home_try_on,number_of_pairs,case when p.user_id is not null then 'TRUE' else 'FALSE' end as is_purchase
+from quiz as 'q'
+left join home_try_on as 'hto'
+on q.user_id=hto.user_id
+left join purchase as 'p'
+on hto.user_id=p.user_id)
+
+select  count(user_id) as Started,count(case when is_home_try_on='TRUE' then 1 else null end) as Tried,
+count(case when is_purchase='TRUE' then 1 else null end) as Purchased from Progress;
+
+with Totals as (
+with Progress as(
+select distinct q.user_id , 
+case when hto.user_id is not null then 'TRUE' else 'FALSE' end as is_home_try_on,number_of_pairs,case when p.user_id is not null then 'TRUE' else 'FALSE' end as is_purchase
+from quiz as 'q'
+left join home_try_on as 'hto'
+on q.user_id=hto.user_id
+left join purchase as 'p'
+on hto.user_id=p.user_id)
+
+select  count(user_id) as Started,count(case when is_home_try_on='TRUE' then 1 else null end) as Tried,count(case when is_purchase='TRUE' then 1 else null end) as Purchased from Progress)
+
+select 1.0* Tried/Started as 'Browse to Try', 1.0* Purchased/Tried as 'Try to Buy',1.0* Purchased/Started as 'Overall Completion'
+
+from Totals;
+
+
+
+
+select 
+   COUNT(CASE WHEN number_of_pairs = '3 pairs' THEN 1 else null END) AS 'Send_3',
+   COUNT(CASE WHEN number_of_pairs = '5 pairs' THEN 1 else null END) AS 'Send 5',
+   count(case when p.user_id is not null then 1 else null end) as 'total_purchased'
+  
+From home_try_on as 'hto'
+left join purchase as 'p'
+on hto.user_id=p.user_id;
+
+
+with Counts as 
+(select 
+   COUNT(CASE WHEN number_of_pairs = '3 pairs' THEN 1 else null END) AS 'Send_3',
+   COUNT(CASE WHEN number_of_pairs = '5 pairs' THEN 1 else null END) AS 'Send_5',
+   count(case when p.user_id is not null then 1 else null end) as 'total_purchased'
+  
+From home_try_on as 'hto'
+left join purchase as 'p'
+on hto.user_id=p.user_id)
+
+Select 
+1.0* Send_3/total_purchased as '3_pair_Purchased',
+1.0* Send_5/total_purchased as '5_pair_Purchased'
+from Counts;
+
+
+select p.color,count(*)
+from quiz as 'q'
+left join purchase as 'p'
+on q.user_id=p.user_id
+group by p.color;
